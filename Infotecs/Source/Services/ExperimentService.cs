@@ -186,7 +186,7 @@ namespace Infotecs.Source.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Произошла ошибка во время обработки файла: {ex.Message}");
+                throw new Exception($"Произошла ошибка во время обработки файла: {ex.Message}", ex);
             }
         }
 
