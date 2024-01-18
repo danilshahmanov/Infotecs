@@ -70,13 +70,9 @@ namespace Infotecs.Source.Helpers
                 _durationSum += value.Duration;
                 _indicatorValueSum += value.IndicatorValue;
                 _firstExperimentStart =
-                    value.StartDateTime < _firstExperimentStart
-                        ? value.StartDateTime
-                        : _firstExperimentStart;
+                    value.StartDateTime < _firstExperimentStart ? value.StartDateTime : _firstExperimentStart;
                 _lastExperimentStart =
-                    value.StartDateTime > _lastExperimentStart
-                        ? value.StartDateTime
-                        : _lastExperimentStart;
+                    value.StartDateTime > _lastExperimentStart ? value.StartDateTime : _lastExperimentStart;
             }
         }
 

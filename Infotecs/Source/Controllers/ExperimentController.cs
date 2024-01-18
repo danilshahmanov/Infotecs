@@ -24,7 +24,7 @@ namespace Infotecs.Source.Controllers
         public async Task<IActionResult> ProcessFile(IFormFile? file, [FromQuery] string authorName)
         {
             if (file is null)
-                return BadRequest("Файл не загружен");
+                return BadRequest("Файл не загружен.");
             try
             {
                 await _experimentService.ProcessFileAsync(file, authorName);
@@ -52,7 +52,7 @@ namespace Infotecs.Source.Controllers
             if (!await _experimentService.FileExistsInDB(fileName))
             {
                 Response.StatusCode = 404;
-                await Response.WriteAsync($"file with name '{fileName}' is not found.");
+                await Response.WriteAsync($"Файл с именем '{fileName}' не найден.");
                 return;
             }
 
@@ -111,18 +111,18 @@ namespace Infotecs.Source.Controllers
         {
             if (minAverageIndicatorValue.HasValue ^ maxAverageIndicatorValue.HasValue)
                 return BadRequest(
-                    "both boundaries for range of average indicator value must be provided."
+                    "Обе границы интервала для среднего показателя должны быть отправлены."
                 );
             if (minAverageDuration.HasValue ^ maxAverageDuration.HasValue)
                 return BadRequest(
-                    "both boundaries for range of average duration must be provided."
+                    "Обе границы интервала для средней длительности должны быть отправлены."
                 );
             if (
                 fileName.IsNullOrEmpty()
                 && !minAverageDuration.HasValue
                 && !minAverageIndicatorValue.HasValue
             )
-                return BadRequest("at least one query parameter must be provided.");
+                return BadRequest("Минимум один параметр должен присутствовать.");
             var results = await _experimentService.GetResultsByQueryParams(
                 fileName,
                 minAverageIndicatorValue,
@@ -131,7 +131,7 @@ namespace Infotecs.Source.Controllers
                 maxAverageDuration
             );
             if (results.Count == 0)
-                return NotFound("no results found matching the provided parameters.");
+                return NotFound("Не найдено результатов соответсвующих параметрам.");
             return Ok(results);
         }
     }

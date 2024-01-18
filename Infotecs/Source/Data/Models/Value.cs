@@ -6,13 +6,13 @@ namespace Infotecs.Source.Data.Models
     {
         [Key]
         public int Id { get; set; }
-
+        //имя файла
         public string FileName { get; set; } = string.Empty;
 
         //дата и время
         public DateTime StartDateTime { get; set; }
 
-        //время
+        //продолжительность
         public int Duration { get; set; }
 
         //показатель

@@ -245,7 +245,7 @@ namespace Infotecs.Source.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                throw new Exception("Ошибка во время обработки файла.", ex);
             }
         }
 
@@ -260,35 +260,25 @@ namespace Infotecs.Source.Services
         /// <returns>Возвращает <c>true</c> если строка не прошла валидацию и должна быть пропущена, <c>false</c> если строка прошла валидацию и не должна быть пропущена.</returns>
         private bool ShouldSkipValue(IReaderRow readerRow)
         {
-            var row = readerRow.Parser.Record;
-            //если в строке больше 3 параметров, то Value не будет создаваться и такая строка отбрасывается
-            if(row is null) 
-                return true;
-            if (row.Length > 3)
-                return true;
-            //если продолжительность не число или меньше 0
-            if (!int.TryParse(row[1], out int duration) && duration <= 0)
-                return true;
-            //если показатель не число или меньше 0
-            if (!float.TryParse(row[2], out float indicatorValue) && indicatorValue <= 0)
-                return true;
-
-            string dateTimeformat = "yyyy-MM-dd_HH-mm-ss";
+            const string dateTimeFormat = "yyyy-MM-dd_HH-mm-ss";
+            const int maxRowLength = 3;
             var minDateTime = new DateTime(2000, 1, 1, 0, 0, 0);
 
-            //если дата и время не соответствуют формату
-            if (
-                !DateTime.TryParseExact(
-                    row[0],
-                    dateTimeformat,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.None,
-                    out DateTime parsedDateTime
-                )
-            )
+            //если в строке больше 3 параметров, то Value не будет создаваться и такая строка отбрасывается
+            var row = readerRow.Parser.Record;
+            if (row is null || row.Length > maxRowLength)
                 return true;
-            //если дата и время раньше 2000-01-01 00:00:00 или позже настоящего момента
-            if (parsedDateTime > DateTime.Now || parsedDateTime < minDateTime)
+
+            if (!int.TryParse(row[1], out int duration) || duration <= 0)
+                return true;
+
+            if (!float.TryParse(row[2], out float indicatorValue) || indicatorValue <= 0)
+                return true;
+            //если дата и время не соответствуют формату
+            if (!DateTime.TryParseExact(row[0], dateTimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateTime))
+                return true;
+
+            if (parsedDateTime > DateTime.UtcNow || parsedDateTime < minDateTime)
                 return true;
 
             return false;
