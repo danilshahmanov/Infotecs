@@ -21,7 +21,7 @@ namespace Infotecs.Source.Controllers
         /// <param name="authorName">Имя автора файла.</param>
         /// <returns>IActionResult сообщающий об успехе или неудачи обработки файла.</returns>
         [HttpPost("files")]
-        public async Task<IActionResult> ProcessFile(IFormFile file, [FromQuery] string authorName)
+        public async Task<IActionResult> ProcessFile(IFormFile? file, [FromQuery] string authorName)
         {
             if (file is null)
                 return BadRequest("Файл не загружен");

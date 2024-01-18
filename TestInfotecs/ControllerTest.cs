@@ -25,7 +25,7 @@ namespace TestInfotecs
         [Fact]
         public async Task ProcessFile_ReturnsBadRequest_WhenFileIsNull()
         {
-            IFormFile nullFile = null;
+            IFormFile? nullFile = null;
             var authorName = "Test Author";
             var result = await _controller.ProcessFile(nullFile, authorName);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -40,16 +40,17 @@ namespace TestInfotecs
         [Fact]
         public async Task GetResultsByQueryParams_ReturnsBadRequest_ForRange()
         {
-            var result = await _controller.GetResultsByQueryParams(null, 10, null, null, null);
+            var result = await _controller.GetResultsByQueryParams(null, 1, null, null, null);
             Assert.IsType<BadRequestObjectResult>(result);
         }
         [Fact]
         public async Task GetResultsByQueryParams_ReturnsNotFound_WhenNoResults()
         {
             _mockExperimentService.Setup(s => s.GetResultsByQueryParams(It.IsAny<string>(), It.IsAny<double?>(), It.IsAny<double?>(), It.IsAny<int?>(), It.IsAny<int?>()))
-                                  .ReturnsAsync(new List<Result>());
-            var result = await _controller.GetResultsByQueryParams("test.txt", 10, 20, 5, 10);
+                                    .ReturnsAsync(new List<Result>());
+            var result = await _controller.GetResultsByQueryParams("testname.csv", 1, 2, 1, 2);
             Assert.IsType<NotFoundObjectResult>(result);
         }
     }
-}
+       
+ }
