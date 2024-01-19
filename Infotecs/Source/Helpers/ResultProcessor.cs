@@ -6,11 +6,9 @@ namespace Infotecs.Source.Helpers
     /// Класс используется для получения сущности Result для определенного файла на основе значений сущностей Value, полученных из буфера.
     /// Значения сущностей Value из буфера обрабатываются и обновляют статистическую информацию использующуюся для вычисления необходимых значений сущности Result.
     /// </summary>
-    public class ResultProcessor
+    public class ResultProcessor : IResultProcessor
     {
-        //Делегат для подсчета медианы по показателям
-        public delegate Task<float> CalculateMedianDelegate(string fileName);
-        private readonly CalculateMedianDelegate _calculateMedianDelegate;
+        private readonly Func<string, Task<float>> _calculateMedianDelegate;
         private long _durationSum;
         private int _minDuration = int.MaxValue;
         private int _maxDuration = int.MinValue;
@@ -25,7 +23,7 @@ namespace Infotecs.Source.Helpers
         /// Создает новый объект ResultProcessor с определенным делегатом для подсчета медианы по показателям.
         /// </summary>
         /// <param name="calculateMedian">Делегат для подсчета медианы по показателям.</param>
-        public ResultProcessor(CalculateMedianDelegate calculateMedian) =>
+        public ResultProcessor(Func<string, Task<float>> calculateMedian) =>
             _calculateMedianDelegate = calculateMedian;
 
         /// <summary>
@@ -35,23 +33,30 @@ namespace Infotecs.Source.Helpers
         /// <returns><c>Result</c> вычисленный на основе статистических характеристик.</returns>
         public async Task<Result> GenerateResultAsync(string fileName)
         {
-            var medianIndicatorValue = await _calculateMedianDelegate(fileName);
-            var result = new Result()
+            try
             {
-                FileName = fileName,
-                FirstExperimentStartTime = TimeOnly.FromDateTime(_firstExperimentStart),
-                LastExperimentStartTime = TimeOnly.FromDateTime(_lastExperimentStart),
-                MaxDuration = _maxDuration,
-                MinDuration = _minDuration,
-                MaxIndicatorValue = _maxIndicatorValue,
-                MinIndicatorValue = _minIndicatorValue,
-                AverageIndicatorValue = (float)(_indicatorValueSum / _experimentsCount),
-                AverageDuration = (int)(_durationSum / _experimentsCount),
-                MedianIndicatorValue = medianIndicatorValue,
-                ExperimentsCount = _experimentsCount
-            };
-            Reset();
-            return result;
+                var medianIndicatorValue = await _calculateMedianDelegate(fileName);
+                var result = new Result()
+                {
+                    FileName = fileName,
+                    FirstExperimentStartTime = TimeOnly.FromDateTime(_firstExperimentStart),
+                    LastExperimentStartTime = TimeOnly.FromDateTime(_lastExperimentStart),
+                    MaxDuration = _maxDuration,
+                    MinDuration = _minDuration,
+                    MaxIndicatorValue = _maxIndicatorValue,
+                    MinIndicatorValue = _minIndicatorValue,
+                    AverageIndicatorValue = (float)(_indicatorValueSum / _experimentsCount),
+                    AverageDuration = (int)(_durationSum / _experimentsCount),
+                    MedianIndicatorValue = medianIndicatorValue,
+                    ExperimentsCount = _experimentsCount
+                };
+                Reset();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Возникла ошибка во время вычисления результата: {ex.Message}", ex);
+            }
         }
 
         /// <summary>

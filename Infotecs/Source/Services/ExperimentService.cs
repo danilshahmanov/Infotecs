@@ -14,14 +14,14 @@ namespace Infotecs.Source.Services
     public class ExperimentService : IExperimentService
     {
         private readonly ExperimentContext _context;
-        private readonly CSVFileReader _csvFileReader;
-        private readonly ResultProcessor _resultProcessor;
+        private readonly ICSVFileReader _csvFileReader;
+        private readonly IResultProcessor _resultProcessor;
 
         public ExperimentService(ExperimentContext context)
         {
             _context = context;
-            _csvFileReader = new CSVFileReader(ShouldSkipValue, BufferFilledHandlerAsync);
             _resultProcessor = new ResultProcessor(CalculateMedianOfIndicatorValue);
+            _csvFileReader = new CSVFileReader(ShouldSkipValue, BufferFilledHandlerAsync);
         }
 
         /// <summary>
@@ -68,11 +68,14 @@ namespace Infotecs.Source.Services
         /// Если число записей четное, то возвращается среднее значение показателей 2х средних записей.
         /// Если число записей нечетное, то возвращается значение показателя средней записи.
         /// </remarks>
-        private async Task<float> CalculateMedianOfIndicatorValue(string fileName)
+        public async Task<float> CalculateMedianOfIndicatorValue(string fileName)
         {
             var query = _context.Values.Where(value => value.FileName == fileName);
             int valuesCount = await query.CountAsync();
-
+            if(valuesCount == 0) 
+            {
+                throw new ArgumentException($"Не существует записей для файла с именем {fileName}.");
+            }
             //считаем опорные средние точки
             int rightMidPoint = valuesCount / 2;
             int leftMidPoint = (valuesCount - 1) / 2;
@@ -224,6 +227,7 @@ namespace Infotecs.Source.Services
             long? id = result as long?;
             if (id is null)
                 throw new Exception("Ошибка загрузки файла в базу данных.");
+            
             using var writeStream = new SqliteBlob(connection, "Files", "Data", id.Value);
             await inputStream.CopyToAsync(writeStream);
 
@@ -258,7 +262,7 @@ namespace Infotecs.Source.Services
         /// </summary>
         /// <param name="row">строка для валидации.</param>
         /// <returns>Возвращает <c>true</c> если строка не прошла валидацию и должна быть пропущена, <c>false</c> если строка прошла валидацию и не должна быть пропущена.</returns>
-        private bool ShouldSkipValue(IReaderRow readerRow)
+        public bool ShouldSkipValue(IReaderRow readerRow)
         {
             const string dateTimeFormat = "yyyy-MM-dd_HH-mm-ss";
             const int maxRowLength = 3;

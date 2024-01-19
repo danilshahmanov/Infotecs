@@ -7,21 +7,26 @@ using Xunit;
 using Infotecs.Source.Controllers;
 using Infotecs.Source.Services;
 using Infotecs.Source.Data.Models;
+using Infotecs.Source.Helpers;
+using Infotecs.Source.Data;
+using CsvHelper;
+using System.Text;
+using CsvHelper.Configuration;
+using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 namespace TestInfotecs
 {
     public class ExperimentControllerTests
     {
         private readonly Mock<IExperimentService> _mockExperimentService;
         private readonly ExperimentController _controller;
-        private readonly Mock<IFormFile> _mockFormFile;
 
         public ExperimentControllerTests()
-        {
+        {          
             _mockExperimentService = new Mock<IExperimentService>();
             _controller = new ExperimentController(_mockExperimentService.Object);
-            _mockFormFile = new Mock<IFormFile>();
         }
-
+    
         [Fact]
         public async Task ProcessFile_ReturnsBadRequest_WhenFileIsNull()
         {
@@ -29,7 +34,7 @@ namespace TestInfotecs
             var authorName = "Test Author";
             var result = await _controller.ProcessFile(nullFile, authorName);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Файл не загружен", badRequestResult.Value);
+            Assert.Equal("Файл не загружен.", badRequestResult.Value);
         }
         [Fact]
         public async Task GetResultsByQueryParams_ReturnsBadRequest_ForNoParameters()

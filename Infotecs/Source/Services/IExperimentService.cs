@@ -1,4 +1,5 @@
-﻿using Infotecs.Source.Data.DTOs;
+﻿using CsvHelper;
+using Infotecs.Source.Data.DTOs;
 using Infotecs.Source.Data.Models;
 
 namespace Infotecs.Source.Services
@@ -15,6 +16,7 @@ namespace Infotecs.Source.Services
             int? minAverageDuration,
             int? maxAverageDuration
         );
+        bool ShouldSkipValue(IReaderRow readerRow);
     }
 
 }

@@ -9,18 +9,18 @@ namespace Infotecs.Source.Helpers
     /// <summary>
     /// Класс используется для чтения сущностей Value из определенного файла с помощью буфера, не загружая файл полностью в память.
     /// </summary>
-    public class CSVFileReader
+    public class CSVFileReader : ICSVFileReader 
     {
         //Обработчик события заполнения буфера, принимает буфер на обработку
         public delegate Task BufferFilledEventHandlerAsync(object sender, List<Value> buffer);
         public event BufferFilledEventHandlerAsync BufferFilled;
         private readonly CsvConfiguration _csvConfig;
-        private readonly List<Value> buffer;
+        private readonly List<Value> _buffer;
 
         /// <summary>
         /// Очищает буфер.
         /// </summary>
-        private void ClearBuffer() => buffer.Clear();
+        private void ClearBuffer() => _buffer.Clear();
 
         /// <summary>
         /// Создает новый объект CSVFileReader.
@@ -32,7 +32,7 @@ namespace Infotecs.Source.Helpers
             BufferFilledEventHandlerAsync bufferFilledEventHandlerAsync
         )
         {
-            buffer = new();
+            _buffer = new();
             BufferFilled += bufferFilledEventHandlerAsync;
             _csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -74,7 +74,7 @@ namespace Infotecs.Source.Helpers
                     break;
                 if (bufferCount == bufferSize)
                 {
-                    await BufferFilled(this, buffer);
+                    await BufferFilled(this, _buffer);
                     bufferCount = 0;
                     ClearBuffer();
                 }
@@ -82,7 +82,7 @@ namespace Infotecs.Source.Helpers
                 if( record != null ) 
                 {
                     record.FileName = fileName;
-                    buffer.Add(record);
+                    _buffer.Add(record);
                     bufferCount++; 
                     validatedValuesCount++;
                 }               
@@ -91,8 +91,8 @@ namespace Infotecs.Source.Helpers
                 throw new ArgumentException(
                     $"Файл содержит менее чем {minValuesCount} валидную строку для мапинга сущности Value"
                 );
-            if (buffer.Count > 0)
-                await BufferFilled(this, buffer);
+            if (_buffer.Count > 0)
+                await BufferFilled(this, _buffer);
         }
     }
 }
