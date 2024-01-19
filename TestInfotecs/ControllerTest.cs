@@ -29,7 +29,7 @@ namespace TestInfotecs
             var authorName = "Test Author";
             var result = await _controller.ProcessFile(nullFile, authorName);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Файл не загружен", badRequestResult.Value);
+            Assert.Equal("Файл не загружен.", badRequestResult.Value);
         }
         [Fact]
         public async Task GetResultsByQueryParams_ReturnsBadRequest_ForNoParameters()
